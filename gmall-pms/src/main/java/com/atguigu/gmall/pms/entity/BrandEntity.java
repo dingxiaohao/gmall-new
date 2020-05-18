@@ -24,7 +24,7 @@ public class BrandEntity implements Serializable {
 	/**
 	 * 品牌id
 	 */
-	@TableId
+	@TableId	//指明该属性为主键id
 	@ApiModelProperty(name = "brandId",value = "品牌id")
 	private Long brandId;
 	/**

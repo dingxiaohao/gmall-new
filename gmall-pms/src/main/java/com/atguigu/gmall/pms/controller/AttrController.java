@@ -7,6 +7,7 @@ import java.util.Map;
 import com.atguigu.core.bean.PageVo;
 import com.atguigu.core.bean.QueryCondition;
 import com.atguigu.core.bean.Resp;
+import com.atguigu.gmall.pms.entity.vo.AttrVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +33,14 @@ import com.atguigu.gmall.pms.service.AttrService;
 public class AttrController {
     @Autowired
     private AttrService attrService;
+                //三级分类对应属性分组，分组再对应属性，属性在对应值
+    @GetMapping //查找这个分类下的属性，基本属性或者销售属性
+    // RequestParam注解就是获取url上的指定key参数的,map的话就把参数全存到map了
+    public Resp<PageVo> queryAttrByTypeOrCid(@RequestParam(required = false) Integer type,
+                                             @RequestParam("cid") Long catelogId,QueryCondition queryCondition){
+        PageVo page = attrService.queryAttrByTypeOrCid(type,catelogId,queryCondition);
+        return Resp.ok(page);
+    }
 
     /**
      * 列表
@@ -64,8 +73,8 @@ public class AttrController {
     @ApiOperation("保存")
     @PostMapping("/save")
     @PreAuthorize("hasAuthority('pms:attr:save')")
-    public Resp<Object> save(@RequestBody AttrEntity attr){
-		attrService.save(attr);
+    public Resp<Object> save(@RequestBody AttrVO attrVO){
+		attrService.saveAttr(attrVO);
 
         return Resp.ok(null);
     }

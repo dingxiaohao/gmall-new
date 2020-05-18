@@ -1,12 +1,14 @@
 package com.atguigu.gmall.wms.controller;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 
 import com.atguigu.core.bean.PageVo;
 import com.atguigu.core.bean.QueryCondition;
 import com.atguigu.core.bean.Resp;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +34,14 @@ import com.atguigu.gmall.wms.service.WareSkuService;
 public class WareSkuController {
     @Autowired
     private WareSkuService wareSkuService;
+
+    //根据skuid查询具体商品的库存
+    @GetMapping("{skuId}")
+    public Resp<List<WareSkuEntity>> queryListBySkuId(@PathVariable Long skuId){
+        //QueryWrapper里泛型填的就是实体类类型,一个实体类对应一个表,就是代表这个条件针对哪个表了
+        List<WareSkuEntity> list = wareSkuService.list(new QueryWrapper<WareSkuEntity>().eq("sku_id", skuId));
+        return Resp.ok(list);
+    }
 
     /**
      * 列表

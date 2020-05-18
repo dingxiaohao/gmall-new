@@ -1,6 +1,8 @@
 package com.atguigu.gmall.pms.service.impl;
 
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 import java.util.Map;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -25,6 +27,15 @@ public class AttrAttrgroupRelationServiceImpl extends ServiceImpl<AttrAttrgroupR
         );
 
         return new PageVo(page);
+    }
+
+    @Override
+    public void deleteAttr(List<AttrAttrgroupRelationEntity> relationEntityList) {
+        relationEntityList.forEach(relationEntity ->{
+            //使用foreach和lambda表达式遍历集合并循环执行删除方法进行删除,箭头函数那个就是每次循环集合的元素
+            //每次遍历循环都执行删除方法,删除条件就是传过来的对象中的数据
+            this.remove(new QueryWrapper<AttrAttrgroupRelationEntity>().eq("attr_id",relationEntity.getAttrId()).eq("attr_group_id",relationEntity.getAttrGroupId()));
+        });
     }
 
 }

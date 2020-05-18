@@ -1,6 +1,7 @@
 package com.atguigu.gmall.pms.controller;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 
@@ -32,6 +33,15 @@ import com.atguigu.gmall.pms.service.AttrAttrgroupRelationService;
 public class AttrAttrgroupRelationController {
     @Autowired
     private AttrAttrgroupRelationService attrAttrgroupRelationService;
+
+
+    //中间表根据id删肯定不对，要根据关联的两个表id删除数据
+    @PostMapping("/delete/attr")
+    public Resp<String> deleteAttr(@RequestBody List<AttrAttrgroupRelationEntity> relationEntityList){
+        attrAttrgroupRelationService.deleteAttr(relationEntityList);
+        return Resp.ok("删除成功");
+    }
+
 
     /**
      * 列表

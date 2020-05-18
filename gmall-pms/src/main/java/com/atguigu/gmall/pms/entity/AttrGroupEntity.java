@@ -24,7 +24,7 @@ public class AttrGroupEntity implements Serializable {
 	/**
 	 * 分组id
 	 */
-	@TableId
+	@TableId	//指明这个属性就是这个表的主键id,然后调方法byid就会根据这个属性判断
 	@ApiModelProperty(name = "attrGroupId",value = "分组id")
 	private Long attrGroupId;
 	/**
