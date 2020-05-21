@@ -4,7 +4,7 @@
 <mapper namespace="com.atguigu.gmall.wms.dao.WareOrderTaskDao">
 
 	<!-- 可根据自己的需求，是否要使用 -->
-    <resultMap type="com.atguigu.gmall.wms.entity.WareOrderTaskEntity" id="wareOrderTaskMap">
+    <resultMap type="entity.WareOrderTaskEntity" id="wareOrderTaskMap">
         <result property="id" column="id"/>
         <result property="orderId" column="order_id"/>
         <result property="orderSn" column="order_sn"/>

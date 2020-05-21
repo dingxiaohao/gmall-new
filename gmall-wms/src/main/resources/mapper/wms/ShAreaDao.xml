@@ -4,7 +4,7 @@
 <mapper namespace="com.atguigu.gmall.wms.dao.ShAreaDao">
 
 	<!-- 可根据自己的需求，是否要使用 -->
-    <resultMap type="com.atguigu.gmall.wms.entity.ShAreaEntity" id="shAreaMap">
+    <resultMap type="entity.ShAreaEntity" id="shAreaMap">
         <result property="id" column="id"/>
         <result property="pid" column="pid"/>
         <result property="shortname" column="shortname"/>

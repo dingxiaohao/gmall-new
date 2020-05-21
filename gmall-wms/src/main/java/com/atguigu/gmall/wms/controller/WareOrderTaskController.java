@@ -1,7 +1,6 @@
 package com.atguigu.gmall.wms.controller;
 
 import java.util.Arrays;
-import java.util.Map;
 
 
 import com.atguigu.core.bean.PageVo;

@@ -4,16 +4,16 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import java.io.Serializable;
-import java.util.Date;
 import lombok.Data;
+
+import java.io.Serializable;
 
 /**
  * 全国省市区信息
  * 
  * @author dxh
- * @email dxh@atguigu.com
- * @date 2020-05-08 18:12:34
+ * @email lxf@atguigu.com
+ * @date 2019-12-31 19:39:57
  */
 @ApiModel
 @Data

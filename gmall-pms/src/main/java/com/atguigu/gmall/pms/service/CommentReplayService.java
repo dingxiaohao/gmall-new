@@ -1,7 +1,7 @@
 package com.atguigu.gmall.pms.service;
 
+import com.atguigu.gmall.pmsinterface.entity.CommentReplayEntity;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.atguigu.gmall.pms.entity.CommentReplayEntity;
 import com.atguigu.core.bean.PageVo;
 import com.atguigu.core.bean.QueryCondition;
 

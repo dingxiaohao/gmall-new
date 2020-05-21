@@ -1,7 +1,7 @@
 package com.atguigu.gmall.pms.service;
 
+import com.atguigu.gmall.pmsinterface.entity.SpuImagesEntity;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.atguigu.gmall.pms.entity.SpuImagesEntity;
 import com.atguigu.core.bean.PageVo;
 import com.atguigu.core.bean.QueryCondition;
 

@@ -1,13 +1,12 @@
 package com.atguigu.gmall.pms.service.impl;
 
 import com.atguigu.gmall.pms.dao.AttrDao;
-import com.atguigu.gmall.pms.entity.*;
-import com.atguigu.gmall.pms.entity.vo.BaseAttrsVO;
-import com.atguigu.gmall.pms.entity.vo.SkuInfoVO;
-import com.atguigu.gmall.pms.entity.vo.SpuInfoVO;
+import com.atguigu.gmall.pms.vo.BaseAttrsVO;
+import com.atguigu.gmall.pms.vo.SkuInfoVO;
+import com.atguigu.gmall.pms.vo.SpuInfoVO;
+import com.atguigu.gmall.pmsinterface.entity.*;
 import com.atguigu.gmall.pms.feign.SmsClient;
 import com.atguigu.gmall.pms.service.*;
-import com.sun.xml.internal.bind.v2.TODO;
 import dto.SaleDTO;
 import io.seata.spring.annotation.GlobalTransactional;
 import org.apache.commons.lang.StringUtils;
@@ -143,6 +142,7 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
             skuInfoEntity.setSkuCode(UUID.randomUUID().toString());
             skuInfoService.save(skuInfoEntity);
             Long skuId = skuInfoEntity.getSkuId();  //获取主键策略生成的skuId
+
             // 2.2. 保存sku图片信息
             //获取图片信息,如果传了图片就会保存在这个属性上,没传图片就是null
             List<String> images = skuInfoVO.getImages();
@@ -164,6 +164,12 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
                 //list集合就是一个工具用来保存数据的,不是属性类型,里面泛型才是具体的属性类型
                 //接口上也可以直接用list然后泛型里写具体的对象也可以接受多个对象,一个也可以接收
                 skuImagesService.saveBatch(skuImagesList);
+            }
+
+            SkuImagesEntity one = skuImagesService.getOne(new QueryWrapper<SkuImagesEntity>().eq("sku_id", skuId).eq("default_img", 1));
+            if (one != null){
+                skuInfoEntity.setSkuDefaultImg(one.getImgUrl());
+                skuInfoService.save(skuInfoEntity);
             }
 
             // 2.3. 保存sku的规格参数（销售属性）
