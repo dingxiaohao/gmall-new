@@ -1,9 +1,12 @@
 package com.atguigu.gmall.search.service;
 
-import com.atguigu.gmall.search.pojo.Goods;
-import com.atguigu.gmall.search.pojo.SearchParam;
-import com.atguigu.gmall.search.pojo.SearchResponseAttrVO;
-import com.atguigu.gmall.search.pojo.SearchResponseVO;
+import com.atguigu.core.bean.Resp;
+import com.atguigu.gmall.pmsinterface.entity.*;
+import com.atguigu.gmall.search.feign.GmallPmsFeign;
+import com.atguigu.gmall.search.feign.GmallWmsFeign;
+import com.atguigu.gmall.search.pojo.*;
+import com.atguigu.gmall.search.repository.GoodsRepository;
+import com.atguigu.gmallwmsinterface.entity.WareSkuEntity;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -46,6 +49,15 @@ public class SearchService {
 
     @Autowired
     private RestHighLevelClient restHighLevelClient;
+
+    @Autowired
+    private GoodsRepository repository;
+
+    @Autowired
+    private GmallPmsFeign pmsFeign;
+
+    @Autowired
+    private GmallWmsFeign wmsFeign;
 
     public SearchResponseVO search(SearchParam searchParam) throws IOException {
         // 构建dsl语句
@@ -259,5 +271,62 @@ public class SearchService {
         searchRequest.types("info");
         searchRequest.source(sourceBuilder);
         return searchRequest;
+    }
+
+    //同步es索引库的业务方法,让mq监听器调用的,一旦发送消息过来之后监听器就执行对应的业务方法
+    public void createIndex(Long spuId) {
+        Resp<List<SkuInfoEntity>> skuResp = pmsFeign.querySkuBySpuId(spuId);
+        List<SkuInfoEntity> skuInfoEntityList = skuResp.getData();
+        if (!CollectionUtils.isEmpty(skuInfoEntityList)){
+            List<Goods> goodsList = skuInfoEntityList.stream().map(skuInfoEntity -> {
+                Goods goods = new Goods();
+                goods.setSkuId(skuInfoEntity.getSkuId());
+                goods.setDefaultImage(skuInfoEntity.getSkuDefaultImg());
+                goods.setTitle(skuInfoEntity.getSkuTitle());
+                goods.setPrice(skuInfoEntity.getPrice().doubleValue());
+                goods.setSale(10l);
+
+                //根据skuid查询是否有库存
+                Resp<List<WareSkuEntity>> wareResp = wmsFeign.queryListBySkuId(skuInfoEntity.getSkuId());
+                List<WareSkuEntity> wareList = wareResp.getData();
+                //设置是否有库存,通过stream流判断元素
+                goods.setStore(wareList.stream().anyMatch(wareSkuEntity -> wareSkuEntity.getStock() > 0));
+                //调用远程接口根据spuId查询具体的一条记录,spuInfo
+                Resp<SpuInfoEntity> spuInfoResp = pmsFeign.querySpuById(spuId);
+                //获取到记录对应的实体类,实体类对应的具体一条记录字段数据
+                SpuInfoEntity spuInfoEntity = spuInfoResp.getData();
+                goods.setCreateTime(spuInfoEntity.getCreateTime()); //设置时间
+                //根据品牌id查询品牌名
+                Resp<BrandEntity> brandResp = pmsFeign.queryBrandById(skuInfoEntity.getBrandId());
+                BrandEntity brandEntity = brandResp.getData();
+                if (brandEntity != null) {
+                    goods.setBrandId(skuInfoEntity.getBrandId());
+                    goods.setBrandName(brandEntity.getName());
+                }
+
+                //根据分类id查询分类名,getData是因为后端返回数据的时候就是保存到data里了,这里get获取就行了
+                Resp<CategoryEntity> categoryResp = pmsFeign.queryCategoryById(skuInfoEntity.getCatalogId());
+                CategoryEntity categoryEntity = categoryResp.getData();
+                if (categoryEntity != null) {
+                    goods.setCategoryName(categoryEntity.getName());
+                    goods.setCategoryId(skuInfoEntity.getCatalogId());
+                }
+                //拿到需要检索查询的属性值,product
+                Resp<List<ProductAttrValueEntity>> attrsBySpuIdResp = pmsFeign.querySearchAttrsBySpuId(skuInfoEntity.getSpuId());
+                List<ProductAttrValueEntity> attrValueEntities = attrsBySpuIdResp.getData();
+                List<SearchAttrValue> searchAttrList = attrValueEntities.stream().map(productAttrValueEntity -> {
+                    SearchAttrValue searchAttrValue = new SearchAttrValue();
+                    searchAttrValue.setAttrId(productAttrValueEntity.getAttrId());
+                    searchAttrValue.setAttrName(productAttrValueEntity.getAttrName());
+                    searchAttrValue.setAttrValue(productAttrValueEntity.getAttrValue());
+                    return searchAttrValue;
+                }).collect(Collectors.toList());
+                goods.setAttrs(searchAttrList);
+                return goods;
+            }).collect(Collectors.toList());
+
+            //执行es的保存
+            repository.saveAll(goodsList);
+        }
     }
 }

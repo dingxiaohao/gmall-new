@@ -7,23 +7,29 @@ spring:
         server-addr: 127.0.0.1:8848
     gateway:
       routes:
-        - id: pms-route # 商品管理路由
+        - id: pms-route # 鍟嗗搧绠＄悊璺敱
           uri: lb://pms-service
           predicates:
             - Path=/pms/**
-        - id: oms-route # 订单管理路由
+        - id: oms-route # 璁㈠崟绠＄悊璺敱
           uri: lb://oms-service
           predicates:
             - Path=/oms/**
-        - id: ums-route # 用户管理路由
+        - id: ums-route # 鐢ㄦ埛绠＄悊璺敱
           uri: lb://ums-service
           predicates:
             - Path=/ums/**
-        - id: wms-route # 仓库管理路由
+        - id: wms-route # 浠撳簱绠＄悊璺敱
           uri: lb://wms-service
           predicates:
             - Path=/wms/**
-        - id: sms-route # 营销管理路由
+        - id: sms-route # 钀ラ攢绠＄悊璺敱
           uri: lb://sms-service
           predicates:
             - Path=/sms/**
+        - id: index-route # 钀ラ攢绠＄悊璺敱
+          uri: lb://index-service
+          predicates:
+            - Path=/api/index/**
+          filters:
+            - RewritePath=/api(?<segment>/?.*), $\{segment}

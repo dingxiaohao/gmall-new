@@ -8,6 +8,7 @@ import java.util.Map;
 import com.atguigu.core.bean.PageVo;
 import com.atguigu.core.bean.QueryCondition;
 import com.atguigu.core.bean.Resp;
+import com.atguigu.gmall.pms.vo.CategoryVO;
 import com.atguigu.gmall.pmsinterface.entity.CategoryEntity;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -36,9 +37,17 @@ public class CategoryController {
 
 
 
+    @ApiOperation("根据一级分类id查询二级分类及三级分类")
+    @GetMapping("{pid}")
+    public Resp<List<CategoryVO>> querySubCategory(@PathVariable("pid")Long pid){
+        List<CategoryVO> categoryVOS = categoryService.querySubCategory(pid);
+        return Resp.ok(categoryVOS);
+    }
+
     @GetMapping
-    public Resp<List<CategoryEntity>> queryCategoryLevelOrParentCid(@RequestParam Map<String,Object> map){
-        List<CategoryEntity> list = categoryService.queryCategoryLevelOrParentCid(map);
+    public Resp<List<CategoryEntity>> queryCategoryLevelOrParentCid(@RequestParam Integer level,
+                                                                    @RequestParam(required = false) Long pid){
+        List<CategoryEntity> list = categoryService.queryCategoryLevelOrParentCid(level,pid);
         return Resp.ok(list);
     }
     /**

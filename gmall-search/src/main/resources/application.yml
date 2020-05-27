@@ -1,10 +1,15 @@
 server:
   port: 8086
 spring:
+  rabbitmq:
+    host: 192.168.125.128
+    username: dxh
+    password: dxh
+    virtual-host: /dxh
   cloud:
     nacos:
       discovery:
-        server-addr: 127.0.0.1:8848
+        server-addr: 127.0.0.1:8848   #nacos注册中心配置
   elasticsearch:
     rest:
       uris: http://192.168.125.128:9200

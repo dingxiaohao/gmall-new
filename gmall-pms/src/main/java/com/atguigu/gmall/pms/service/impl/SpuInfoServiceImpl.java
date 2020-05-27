@@ -9,7 +9,9 @@ import com.atguigu.gmall.pms.feign.SmsClient;
 import com.atguigu.gmall.pms.service.*;
 import dto.SaleDTO;
 import io.seata.spring.annotation.GlobalTransactional;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
+import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -52,6 +54,9 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
     @Autowired
     private SmsClient smsClient;
 
+    @Autowired
+    private AmqpTemplate amqpTemplate;
+
     @Override
     public PageVo queryPage(QueryCondition params) {
         IPage<SpuInfoEntity> page = this.page(
@@ -88,6 +93,13 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
 
         //pagevo对象返回前端进行展示的分页对象，构造器可以把ipage转为pagevo对象返回前端进行展示
         return new PageVo(page);
+    }
+    //像mq发送消息,默认就是配置文件的地址发送,发送到对应地址对应账户的对应名字交换机
+    //像mq发送消息服务间通信的,其他服务订阅mq就能接收到发送的消息,然后再做一些业务操作
+    private void sendMessage(Long id, String type){
+        //pms像mq发送消息,search服务接收到消息做一些业务的操作
+        // 发送消息,消息就是spu的id
+        this.amqpTemplate.convertAndSend("item." + type, id);
     }
 
     @GlobalTransactional
@@ -199,11 +211,12 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
             BeanUtils.copyProperties(skuInfoVO,saleDTO);
             saleDTO.setSkuId(skuId);
             //注入openfeign接口远程调用其他微服务接口
+            // 3.2. 满减优惠
+            // 3.3. 数量折扣
             smsClient.saveSkuSaleInfo(saleDTO);
 
-            // 3.2. 满减优惠
-
-            // 3.3. 数量折扣
+            //携带spuId像mq发送消息,对应配置文件的交换机
+            sendMessage(spuId,"insert");
         });
 
 
